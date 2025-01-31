@@ -1,0 +1,4 @@
+*.core
+compile_commands.json
+a.out
+/build/
