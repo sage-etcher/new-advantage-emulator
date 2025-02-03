@@ -90,7 +90,7 @@ build: $(TARGET)
 clean:
 	rm -f $(TARGET)
 	rm -f $(OBJS)
-	-rmdir $(BUILD_PATH)
+	-find $(BUILD_PATH) -type d -delete
 
 bear: clean
 	bear --force-wrapper -- $(MAKE) build
