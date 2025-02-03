@@ -81,7 +81,7 @@ crt_destroy (crt_t *self)
 void *
 crt_start (crt_t *self)
 { 
-    /* 60 hz */
+    /* REFRESH_RATE = 60 hz */
     const struct timespec REFRESH_RATE = { .tv_sec = 0, .tv_nsec = 16666666};
     struct timespec previous_frame = { 0 };
     struct timespec previous_sleep = { 0 };
@@ -90,10 +90,8 @@ crt_start (crt_t *self)
     while (!mobo_should_exit (self->parent))
     {
         crt_copy_to_buffer (self);
+
         crt_set_refresh_register (self, 1);
-
-        printf ("crt start\n");
-
         previous_sleep = timer (&previous_frame, REFRESH_RATE);
     }
 

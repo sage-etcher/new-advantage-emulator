@@ -52,7 +52,8 @@ void *
 z80_start (z80_t *self)
 {
     /* expecting cpu of 4mhz, scale ticks acordingly */
-    /* wait for 100us or 10khz */
+    /* wait for 100us or 10khz every 400 emulated cycles */
+    /* current systems cannot wait precise nanoseonds */
     const struct timespec CPU_SPEED = { .tv_nsec = 100000 };
     const uint32_t ticks_before_sleep = 400;
     struct timespec previous_frame = { 0 };
@@ -62,17 +63,12 @@ z80_start (z80_t *self)
 
     while (!mobo_should_exit (self->parent))
     {
-        if (mobo_get_refresh_register (self->parent))
-        {
-            printf ("detected screen refresh\n");
-        }
-        mobo_clear_refresh_register (self->parent);
 
-        self->ticks += 20;
+
+        self->ticks++; /* debug ONLY */
+
         while (self->ticks>= ticks_before_sleep)
         {
-            /* printf ("cpu busy waiting\n"); */
-            putc ('.', stdout);
             self->ticks -= ticks_before_sleep;
             previous_sleep = timer (&previous_frame, CPU_SPEED);
         }
