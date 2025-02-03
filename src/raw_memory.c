@@ -26,7 +26,7 @@ raw_memory_init (size_t size)
     buf_size = sizeof (uint8_t) * size;
     alloc_size = buf_size + sizeof (raw_memory_t);
     self = (raw_memory_t *)malloc (alloc_size);
-    assert (self != NULL);
+    assert (self);
 
     /* 0 out the whole allocated chunk */
     (void)memset (self, 0, alloc_size);
@@ -64,7 +64,7 @@ raw_memory_read (raw_memory_t *self, size_t raw_addr)
 {
     uint8_t data = 0;
 
-    assert (self != NULL);
+    assert (self);
     assert (raw_addr < self->size);
 
     (void)mtx_lock (&self->memory_lock);
@@ -78,7 +78,7 @@ raw_memory_read (raw_memory_t *self, size_t raw_addr)
 void
 raw_memory_write (raw_memory_t *self, size_t raw_addr, uint8_t data)
 {
-    assert (self != NULL);
+    assert (self);
     assert (raw_addr < self->size);
 
     (void)mtx_lock (&self->memory_lock);
@@ -90,7 +90,7 @@ raw_memory_write (raw_memory_t *self, size_t raw_addr, uint8_t data)
 size_t
 raw_memory_size (raw_memory_t *self)
 {
-    assert (self != NULL);
+    assert (self);
 
     return self->size;
 }

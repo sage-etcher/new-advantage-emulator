@@ -46,7 +46,7 @@ mobo_init (void)
 
     /* motherboard */
     self = malloc (sizeof (mobo_t));
-    assert (self != NULL);
+    assert (self);
     (void)memset (self, 0, sizeof (mobo_t));
 
 
@@ -101,7 +101,7 @@ mobo_start (mobo_t *self)
     char input = 0;
     thrd_t threads[4] = { 0 };
 
-    assert (self != NULL);
+    assert (self);
 
     (void)thrd_create (&threads[0], (thrd_start_t)crt_start, self->crt);
     (void)thrd_create (&threads[1], (thrd_start_t)z80_start, self->cpu);
@@ -119,7 +119,7 @@ mobo_should_exit (mobo_t *self)
 {
     bool status = false;
 
-    assert (self != NULL);
+    assert (self);
 
     (void)mtx_lock (&self->exit_lock);
     status = self->should_exit;
@@ -132,7 +132,7 @@ mobo_should_exit (mobo_t *self)
 void
 mobo_exit (mobo_t *self)
 {
-    assert (self != NULL);
+    assert (self);
 
     (void)mtx_lock (&self->exit_lock);
     self->should_exit = true;
@@ -144,7 +144,7 @@ mobo_exit (mobo_t *self)
 uint8_t
 mobo_get_scroll_register (mobo_t *self)
 {
-    assert (self != NULL);
+    assert (self);
 
     return crt_get_scroll_register (self->crt);
 }
@@ -153,7 +153,7 @@ mobo_get_scroll_register (mobo_t *self)
 void
 mobo_set_scroll_register (mobo_t *self, uint8_t data)
 {
-    assert (self != NULL);
+    assert (self);
 
     crt_set_scroll_register (self->crt, data);
 }
@@ -162,7 +162,7 @@ mobo_set_scroll_register (mobo_t *self, uint8_t data)
 uint8_t
 mobo_get_refresh_register (mobo_t *self)
 {
-    assert (self != NULL);
+    assert (self);
 
     return crt_get_refresh_register (self->crt);
 }
@@ -171,7 +171,7 @@ mobo_get_refresh_register (mobo_t *self)
 void
 mobo_clear_refresh_register (mobo_t *self)
 {
-    assert (self != NULL);
+    assert (self);
 
     crt_set_refresh_register (self->crt, 0);
 }

@@ -24,7 +24,7 @@ emu_init (void)
     emu_t *self = NULL;
 
     self = (emu_t *)malloc (sizeof (emu_t));
-    assert (self != NULL);
+    assert (self);
     (void)memset (self, 0, sizeof (emu_t));
 
     self->core = mobo_init ();
@@ -36,7 +36,7 @@ emu_init (void)
 void
 emu_destroy (emu_t *self)
 {
-    assert (self != NULL);
+    assert (self);
 
     mobo_destroy (self->core);
 

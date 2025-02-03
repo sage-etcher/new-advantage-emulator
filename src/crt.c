@@ -43,7 +43,7 @@ crt_init (mobo_t *parent, size_t width, size_t height, size_t x_offset,
     size_t buf_size = 0;
     
     self = (crt_t *)malloc (sizeof (crt_t));
-    assert (self != NULL);
+    assert (self);
     (void)memset (self, 0, sizeof (crt_t));
 
     self->parent = parent;
@@ -55,7 +55,7 @@ crt_init (mobo_t *parent, size_t width, size_t height, size_t x_offset,
 
     buf_size = width * height;
     self->buf = (uint8_t *)malloc (sizeof (uint8_t) * buf_size);
-    assert (self->buf != NULL);
+    assert (self->buf);
     self->buf_size = buf_size;
     (void)memset (self->buf, 0, self->buf_size);
 
@@ -66,7 +66,7 @@ crt_init (mobo_t *parent, size_t width, size_t height, size_t x_offset,
 void
 crt_destroy (crt_t *self)
 {
-    assert (self != NULL);
+    assert (self);
 
     free (self->buf);
     self->buf = NULL;
@@ -104,7 +104,7 @@ crt_start (crt_t *self)
 uint8_t
 crt_get_scroll_register (crt_t *self)
 {
-    assert (self != NULL);
+    assert (self);
     return self->scroll_offset;
 }
 
@@ -112,7 +112,7 @@ crt_get_scroll_register (crt_t *self)
 void
 crt_set_scroll_register (crt_t *self, uint8_t data)
 {
-    assert (self != NULL);
+    assert (self);
     self->scroll_offset = data;
 }
 
@@ -120,7 +120,7 @@ crt_set_scroll_register (crt_t *self, uint8_t data)
 uint8_t
 crt_get_refresh_register (crt_t *self)
 {
-    assert (self != NULL);
+    assert (self);
     return self->refresh_flag;
 }
 
@@ -128,7 +128,7 @@ crt_get_refresh_register (crt_t *self)
 void
 crt_set_refresh_register (crt_t *self, uint8_t data)
 {
-    assert (self != NULL);
+    assert (self);
 
     self->refresh_flag = data;
 }
@@ -144,9 +144,9 @@ crt_copy_to_buffer (crt_t *self)
     uint8_t data = 0;
     uint8_t scroll_offset = 0;
 
-    assert (self != NULL);
-    assert (self->buf != NULL);
-    assert (self->parent != NULL);
+    assert (self);
+    assert (self->buf);
+    assert (self->parent);
 
     scroll_offset = crt_get_scroll_register (self);
 

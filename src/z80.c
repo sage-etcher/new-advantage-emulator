@@ -28,7 +28,7 @@ z80_init (mobo_t *parent)
     z80_t *self = NULL;
 
     self = (z80_t *)malloc (sizeof (z80_t));
-    assert (self != NULL);
+    assert (self);
     (void)memset (self, 0, sizeof (z80_t));
 
     self->parent = parent;

@@ -36,7 +36,7 @@ mmu_init (void)
 
     /* allocate mmu */
     self = (mmu_t *)malloc (sizeof (mmu_t));
-    assert (self != NULL);
+    assert (self);
     (void)memset (self, 0, sizeof (mmu_t));
     
     (void)mtx_init(&self->map_lock, mtx_plain);
@@ -64,7 +64,7 @@ mmu_decode_mapped_page (mmu_t *self, size_t addr)
     mmu_page_index_t mapped_index = 0;
     mmu_page_index_t page_index = 0;
 
-    assert (self != NULL);
+    assert (self);
 
     mapped_index = addr / MMU_MAPPED_PAGE_SIZE;
     assert (mapped_index < MMU_MAPPED_PAGE_CNT);
@@ -89,7 +89,7 @@ mmu_decode_raw_addr (mmu_page_t *p_page, size_t addr)
 {
     size_t raw_addr = 0;
    
-    assert (p_page != NULL);
+    assert (p_page);
     raw_addr = addr + p_page->offset;
 
     return raw_addr;
@@ -120,7 +120,7 @@ mmu_decode_addr (mmu_t *self, size_t addr)
     mmu_page_index_t page_index = 0;
     mmu_page_index_t raw_addr = 0;
 
-    assert (self != NULL);
+    assert (self);
 
     page_index = mmu_decode_mapped_page (self, addr);
     raw_addr   = mmu_decode_raw_page (self, page_index, addr);
@@ -136,7 +136,7 @@ mmu_read  (mmu_t *self, size_t addr)
     size_t raw_addr = 0;
     uint8_t read_byte = 0;
 
-    assert (self != NULL);
+    assert (self);
 
     raw_addr  = mmu_decode_addr (self, addr);
     read_byte = raw_memory_read (self->raw_memory, raw_addr);
@@ -150,7 +150,7 @@ mmu_write (mmu_t *self, size_t addr, uint8_t data)
 {
     size_t raw_addr = 0;
 
-    assert (self != NULL);
+    assert (self);
 
     raw_addr = mmu_decode_addr (self, addr);
     raw_memory_write (self->raw_memory, raw_addr, data);
@@ -163,7 +163,7 @@ mmu_read_raw (mmu_t *self, int page_index, size_t addr)
     size_t raw_addr = addr; /* use raw addressing for all negative indexes */
     uint8_t read_byte = 0;
 
-    assert (self != NULL);
+    assert (self);
   
     /* if page_index is positive, deref from the raw_page */
     if (page_index >= 0)
@@ -182,7 +182,7 @@ mmu_write_raw (mmu_t *self, int page_index, size_t addr, uint8_t data)
 {
     size_t raw_addr = addr; /* use raw addressing for all negative indexes */
 
-    assert (self != NULL);
+    assert (self);
   
     /* if page_index is positive, deref from the raw_page */
     if (page_index >= 0)
@@ -197,10 +197,10 @@ mmu_write_raw (mmu_t *self, int page_index, size_t addr, uint8_t data)
 int
 mmu_create_raw_memory (mmu_t *self, size_t raw_mem_size)
 {
-    assert (self != NULL);
+    assert (self);
 
     /* if raw_memory is already set, panic */
-    if (self->raw_memory != NULL) 
+    if (self->raw_memory) 
     {
         return -1;
     }
@@ -216,8 +216,8 @@ mmu_create_page (mmu_t *self, int page_index, size_t offset, size_t size)
 {
     size_t end_addr = 0;
 
-    assert (self != NULL);
-    assert (self->raw_memory != NULL);
+    assert (self);
+    assert (self->raw_memory);
     assert (page_index < MMU_ADDRESSABLE_PAGE_CNT);
     assert (page_index >= 0);
 
@@ -233,7 +233,7 @@ mmu_create_page (mmu_t *self, int page_index, size_t offset, size_t size)
 void
 mmu_map (mmu_t *self, int map_page, int raw_page)
 {
-    assert (self != NULL);
+    assert (self);
     assert (map_page < MMU_MAPPED_PAGE_CNT);
     assert (map_page >= 0);
     assert (raw_page < MMU_ADDRESSABLE_PAGE_CNT);
@@ -254,7 +254,7 @@ mmu_init_from_template (mmu_template_t *template, size_t n)
     size_t offset = 0;
     size_t raw_size = 0;
 
-    assert (template != NULL);
+    assert (template);
     assert (n < MMU_ADDRESSABLE_PAGE_CNT);
 
 
