@@ -20,8 +20,7 @@ typedef struct mobo
     mmu_t *ram;
     z80_t *cpu;
     crt_t *crt;
-    bool should_exit;
-    mtx_t exit_lock;
+    _Atomic bool should_exit;
 } mobo_t;
 
 
@@ -72,7 +71,6 @@ mobo_init (void)
     }
 
     self->should_exit = false;
-    (void)mtx_init (&self->exit_lock, mtx_plain);
 
     return self;
 }
@@ -86,8 +84,6 @@ mobo_destroy (mobo_t *self)
     mmu_destroy (self->ram);
     z80_destroy (self->cpu);
     crt_destroy (self->crt);
-
-    mtx_destroy (&self->exit_lock);
 
     (void)memset (self, 0, sizeof (mobo_t));
 
@@ -117,15 +113,8 @@ mobo_start (mobo_t *self)
 bool
 mobo_should_exit (mobo_t *self)
 {
-    bool status = false;
-
     assert (self);
-
-    (void)mtx_lock (&self->exit_lock);
-    status = self->should_exit;
-    (void)mtx_unlock (&self->exit_lock);
-
-    return status;
+    return self->should_exit;
 }
 
 
@@ -133,11 +122,7 @@ void
 mobo_exit (mobo_t *self)
 {
     assert (self);
-
-    (void)mtx_lock (&self->exit_lock);
     self->should_exit = true;
-    (void)mtx_unlock (&self->exit_lock);
-
 }
 
 
