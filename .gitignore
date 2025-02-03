@@ -1,4 +1,4 @@
 *.core
-compile_commands.json
 a.out
+compile_commands.json
 /build/
