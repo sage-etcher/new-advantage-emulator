@@ -27,11 +27,8 @@ typedef struct crt
     uint8_t *buf;
     size_t buf_size;
 
-    uint8_t scroll_offset;
-    mtx_t scroll_mtx;
-
-    uint8_t refresh_flag;
-    mtx_t refresh_mtx;
+    _Atomic uint8_t scroll_offset;
+    _Atomic uint8_t refresh_flag;
 } crt_t;
 
 
@@ -62,9 +59,6 @@ crt_init (mobo_t *parent, size_t width, size_t height, size_t x_offset,
     self->buf_size = buf_size;
     (void)memset (self->buf, 0, self->buf_size);
 
-    (void)mtx_init (&self->scroll_mtx,  mtx_plain);
-    (void)mtx_init (&self->refresh_mtx, mtx_plain);
-
     return self;
 }
 
@@ -77,9 +71,6 @@ crt_destroy (crt_t *self)
     free (self->buf);
     self->buf = NULL;
     self->buf_size = 0;
-
-    mtx_destroy (&self->scroll_mtx);
-    mtx_destroy (&self->refresh_mtx);
 
     (void)memset (self, 0, sizeof (crt_t));
     
@@ -113,15 +104,8 @@ crt_start (crt_t *self)
 uint8_t
 crt_get_scroll_register (crt_t *self)
 {
-    uint8_t scroll_offset = 0;
-
     assert (self != NULL);
-
-    (void)mtx_lock (&self->scroll_mtx);
-    scroll_offset = self->scroll_offset;
-    (void)mtx_unlock (&self->scroll_mtx);
-
-    return scroll_offset;
+    return self->scroll_offset;
 }
 
 
@@ -129,25 +113,15 @@ void
 crt_set_scroll_register (crt_t *self, uint8_t data)
 {
     assert (self != NULL);
-
-    (void)mtx_lock (&self->scroll_mtx);
     self->scroll_offset = data;
-    (void)mtx_unlock (&self->scroll_mtx);
 }
 
 
 uint8_t
 crt_get_refresh_register (crt_t *self)
 {
-    uint8_t refresh_flag = 0;
-
     assert (self != NULL);
-
-    (void)mtx_lock (&self->refresh_mtx);
-    refresh_flag = self->refresh_flag;
-    (void)mtx_unlock (&self->refresh_mtx);
-
-    return refresh_flag;
+    return self->refresh_flag;
 }
 
 
@@ -156,9 +130,7 @@ crt_set_refresh_register (crt_t *self, uint8_t data)
 {
     assert (self != NULL);
 
-    (void)mtx_lock (&self->refresh_mtx);
     self->refresh_flag = data;
-    (void)mtx_unlock (&self->refresh_mtx);
 }
 
 
