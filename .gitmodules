@@ -1,0 +1,3 @@
+[submodule "external/z80emu"]
+	path = external/z80emu
+	url = https://github.com/anotherlin/z80emu.git
