@@ -2,6 +2,7 @@
 #include "z80.h"
 
 #include "mobo.h"
+#include "timer.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -52,10 +53,10 @@ z80_start (z80_t *self)
 {
     /* expecting cpu of 4mhz, scale ticks acordingly */
     /* wait for 100us or 10khz */
-    const struct timespec ts = { .tv_nsec = 100000 };
-    uint32_t ticks_before_sleep = 400;
-
-    uint8_t refresh_status = 0;
+    const struct timespec CPU_SPEED = { .tv_nsec = 100000 };
+    const uint32_t ticks_before_sleep = 400;
+    struct timespec previous_frame = { 0 };
+    struct timespec previous_sleep = { 0 };
 
     self->ticks = 0;
 
@@ -73,7 +74,7 @@ z80_start (z80_t *self)
             /* printf ("cpu busy waiting\n"); */
             putc ('.', stdout);
             self->ticks -= ticks_before_sleep;
-            (void)thrd_sleep (&ts, NULL);
+            previous_sleep = timer (&previous_frame, CPU_SPEED);
         }
     }
 

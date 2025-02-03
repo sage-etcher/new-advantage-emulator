@@ -22,6 +22,7 @@ SRC_FILES = crt.c \
             mobo.c \
             raw_memory.c \
             test.c \
+            timer.c \
             z80.c \
 
 SRCS := $(addprefix $(SRC_PATH)/,$(SRC_FILES))
@@ -119,6 +120,7 @@ mmu.c.o: mmu.c mmu.h raw_memory.h Makefile
 mobo.c.o: mobo.c mobo.h adv_system_config.h crt.h mmu.h z80.h Makefile
 raw_memory.c.o: raw_memory.c raw_memory.h Makefile 
 test.c.o: test.c emu.h Makefile
+timer.c.o: timer.c timer.h Makefile
 z80.c.o: z80.c z80.h Makefile
 
 # generic

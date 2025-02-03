@@ -2,6 +2,7 @@
 #include "crt.h"
 
 #include "mobo.h"
+#include "timer.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -90,14 +91,19 @@ void *
 crt_start (crt_t *self)
 { 
     /* 60 hz */
-    const struct timespec refresh_rate = { .tv_nsec = 16666666};
+    const struct timespec REFRESH_RATE = { .tv_sec = 0, .tv_nsec = 16666666};
+    struct timespec previous_frame = { 0 };
+    struct timespec previous_sleep = { 0 };
+
 
     while (!mobo_should_exit (self->parent))
     {
         crt_copy_to_buffer (self);
         crt_set_refresh_register (self, 1);
+
         printf ("crt start\n");
-        (void)thrd_sleep (&refresh_rate, NULL);
+
+        previous_sleep = timer (&previous_frame, REFRESH_RATE);
     }
 
     thrd_exit (thrd_success);
