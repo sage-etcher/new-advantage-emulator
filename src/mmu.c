@@ -284,4 +284,16 @@ mmu_init_from_template (mmu_template_t *template, size_t n)
 }
 
 
+void
+mmu_memcpy (mmu_t *self, size_t addr, uint8_t *buffer, size_t bufn)
+{
+    assert (self);
+
+    for (; bufn > 0; bufn--, buffer++, addr++)
+    {
+        mmu_write (self, addr, *buffer);
+    }
+}
+
+
 /* end of file */

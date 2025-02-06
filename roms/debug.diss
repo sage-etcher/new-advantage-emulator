@@ -1,0 +1,12 @@
+0000 31 13 01           lxi     sp,stack        ;init stack
+0003 3e 01              mvi     a,1             ;a = 1
+0005 06 02              mvi     b,2             ;b = 2
+0007 80                 add     b               ;a += b
+0008 db 00              in      00              ;port00 = a
+000A d3 00              out     00              ;a = port00
+000C 80                 add     b               ;a += b
+000D db 00              in      00              ;port00 = a
+000F = halt     halt:
+000F 76                 hlt                     ;halt the cpu
+0010 c3 0f 00           jmp     halt            ;if unhalt, re-halt
+0113 = stack    stack:  ds      0100            ;define a 256 byte stack

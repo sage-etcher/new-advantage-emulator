@@ -46,6 +46,7 @@ void mmu_write_raw (mmu_t *self, int page_index, size_t addr, uint8_t data);
 
 void mmu_map (mmu_t *self, int map_page, int raw_page);
 
+void mmu_memcpy (mmu_t *self, size_t addr, uint8_t *buffer, size_t bufn);
 
 #endif
 /* end of file */

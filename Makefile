@@ -22,6 +22,7 @@ ADV_TARGET := $(BUILD_BIN_PATH)/a.out
 ADV_FILES  := \
 			  crt.c \
 			  emu.c \
+			  fileio.c \
 			  mmu.c \
 			  mobo.c \
 			  raw_memory.c \

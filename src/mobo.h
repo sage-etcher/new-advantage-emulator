@@ -20,6 +20,9 @@ bool mobo_should_exit (mobo_t *self);
 
 void mobo_exit (mobo_t *self);
 
+int mobo_load_prom_file (mobo_t *self, char *filename);
+void mobo_load_prom (mobo_t *self, uint8_t *buffer, size_t buf_size);
+
 uint8_t mobo_read_dram (mobo_t *self, size_t addr);
 
 uint8_t mobo_get_scroll_register (mobo_t *self);

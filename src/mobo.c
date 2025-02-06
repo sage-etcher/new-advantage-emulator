@@ -3,6 +3,7 @@
 
 #include "adv_system_config.h"
 #include "crt.h"
+#include "fileio.h"
 #include "mmu.h"
 #include "z80.h"
 
@@ -91,13 +92,73 @@ mobo_destroy (mobo_t *self)
 }
 
 
+int
+mobo_load_prom_file (mobo_t *self, char *filename)
+{
+    uint8_t *prom_data = NULL;
+    size_t   prom_size = 0;
+    size_t   read_size = 0;
+
+    assert (self);
+
+    if (filename == NULL)
+    {
+        return -1;
+    }
+
+    prom_size = file_get_length (filename);
+    if (prom_size == 0)
+    {
+        return -1;
+    }
+
+    prom_data = (uint8_t *)malloc (prom_size);
+    assert (prom_data);
+
+    read_size = file_read (filename, prom_data, prom_size); 
+    mobo_load_prom (self, prom_data, read_size);
+
+    free (prom_data);
+    prom_data = NULL;
+    prom_size = 0;
+    read_size = 0;
+
+    return 0;
+}
+
+
+void
+mobo_load_prom (mobo_t *self, uint8_t *buffer, size_t buf_size)
+{
+    assert (self);
+    assert (buffer);
+    mmu_memcpy (self->ram, 0x0000, buffer, buf_size);
+}
+
+
+
 void
 mobo_start (mobo_t *self)
 {
     char input = 0;
+    int retcode = 0;
+    char *prom_file = NULL;
     thrd_t threads[4] = { 0 };
 
     assert (self);
+
+#ifdef DEBUG
+    /* prom_file = (char *)"./roms/debug.com"; */
+    (void)fprintf (stderr, "debug mode enabled\n");
+#endif
+
+    retcode = mobo_load_prom_file (self, prom_file);
+    if (retcode)
+    {
+        /* if no prom is available, start the cpu halted */
+        (void)fprintf (stderr, "mobo: no prom loaded\n");
+        z80_halt (self->cpu);
+    }
 
     (void)thrd_create (&threads[0], (thrd_start_t)crt_start, self->crt);
     (void)thrd_create (&threads[1], (thrd_start_t)z80_start, self->cpu);
