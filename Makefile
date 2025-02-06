@@ -1,133 +1,118 @@
 
-
-TYPE_DEBUG   = debug
-TYPE_RELEASE = release
-# set default type
-#BUILD_TYPE = $(TYPE_RELEASE)
-BUILD_TYPE = $(TYPE_DEBUG)
-
-# if DEBUG is defined set BUILD_TYPE to TYPE_DEBUG
-ifdef DEBUG
-BUILD_TYPE = $(TYPE_DEBUG)
-endif
-
-SRC_PATH   = ./src
-BUILD_PATH = ./build
-
-TARGET = a.out
-
-SRC_FILES = crt.c \
-            emu.c \
-            mmu.c \
-            mobo.c \
-            raw_memory.c \
-            test.c \
-            timer.c \
-            z80.c \
-
-SRCS := $(addprefix $(SRC_PATH)/,$(SRC_FILES))
-OBJS := $(addprefix $(BUILD_PATH)/,$(addsuffix .o,$(SRCS)))
+include config.mk
 
 
-DEBUG_CFLAGS = -O0
-DEBUG_LFLAGS = -g
 
-RELEASE_CFLAGS = -O2
-RELEASE_LFLAGS = -s
+# Path declaration
+# Helps for sharing includes
+Z80EMU_PATH := $(EXTERNAL_PATH)/z80emu
+ADV_PATH    := $(SRC_PATH)
 
-C11THREADS_CFLAGS =
-C11THREADS_LFLAGS = -lstdthreads
+# Z80Emu
+Z80EMU_FILES  := z80emu.c
+Z80EMU_SRCS   := $(addprefix $(Z80EMU_PATH)/,$(Z80EMU_FILES))
+Z80EMU_OBJS   := $(foreach filename,$(Z80EMU_FILES),$(BUILD_OBJ_PATH)/$(filename).o)
+Z80EMU_DEPS   := $(foreach filename,$(Z80EMU_FILES),$(BUILD_DEP_PATH)/$(filename).d)
+Z80EMU_CFLAGS := -I$(Z80EMU_PATH) -I$(ADV_PATH)
+Z80EMU_USER_EX    := $(Z80EMU_PATH)/z80user.h
+Z80EMU_USER_NOUSE := $(Z80EMU_USER_EX).nouse
 
-CC = cc
-WARN  = -Wall
-WARN += -std=c11
-WARN += -Wextra
-WARN += -Wpedantic -pedantic-errors
-WARN += -Waggregate-return \
-		-Wbad-function-cast \
-		-Wcast-align \
-		-Wcast-qual \
-		-Wdeclaration-after-statement \
-		-Wmissing-declarations \
-		-Wmissing-include-dirs \
-		-Wmissing-prototypes \
-		-Wnested-externs \
-		-Wpointer-arith \
-		-Wpointer-to-int-cast \
-		-Wint-to-pointer-cast \
-		-Wredundant-decls \
-		-Wsequence-point \
-		-Wshadow \
-		-Wstrict-prototypes \
-		-Wswitch \
-		-Wundef \
-		-Wunreachable-code \
-		-Wunused-but-set-parameter \
-		-Wwrite-strings \
-		-fstack-protector
-CFLAGS := $(C11THREADS_CFLAGS) $(WARN)
-
-LD = cc
-LFLAGS = $(C11THREADS_LFLAGS)
-
-# BUILD_TYPE compile/linker flags
-# append debug flags
-ifeq ("$(BUILD_TYPE)", "$(TYPE_DEBUG)")
-CFLAGS += $(DEBUG_CFLAGS)
-LFLAGS += $(DEBUG_LFLAGS)
-endif 
-
-# append release flags
-ifeq ("$(BUILD_TYPE)", "$(TYPE_RELEASE)")
-CFLAGS += $(RELEASE_CFLAGS)
-LFLAGS += $(RELEASE_LFLAGS)
-endif
+# Advantage Emulator
+ADV_TARGET := $(BUILD_BIN_PATH)/a.out
+ADV_FILES  := \
+			  crt.c \
+			  emu.c \
+			  mmu.c \
+			  mobo.c \
+			  raw_memory.c \
+			  test.c \
+			  timer.c \
+			  z80.c
+ADV_SRCS   := $(addprefix $(SRC_PATH)/,$(ADV_FILES))
+ADV_DEPS   := $(foreach filename,$(ADV_FILES),$(BUILD_DEP_PATH)/$(filename).d)
+ADV_OBJS   := $(foreach filename,$(ADV_FILES),$(BUILD_OBJ_PATH)/$(filename).o) \
+			  $(Z80EMU_OBJS)
+ADV_CFLAGS := -I$(ADV_PATH) -I$(Z80EMU_PATH)
+ADV_LFLAGS := $(THREADS_LFLAGS)
 
 
-# names
-build: $(TARGET)
+# Collections
+TARGETS := $(ADV_TARGET)
+
+ALL_CFLAGS := $(CFLAGS) $(ADV_CFLAGS) $(Z80EMU_CFLAGS)
+
+
+# Phonys
+all: build
+
+build: $(TARGETS)
 
 clean:
-	rm -f $(TARGET)
-	rm -f $(OBJS)
+	rm -f $(ADV_OBJS)
+	rm -f $(ADV_DEPS)
+	rm -f $(ADV_TARGET)
+	rm -f $(Z80EMU_OBJS)
+	rm -f $(Z80EMU_DEPS)
+	-mv $(Z80EMU_USER_NOUSE) $(Z80EMU_USER_EX)
 	-find $(BUILD_PATH) -type d -delete
 
-bear: clean
-	bear --force-wrapper -- $(MAKE) build
+runadv:
+	./$(ADV_TARGET)
 
-bearclean:
-	rm -f compile_commands.json
+bear: $(BEAR_OUTPUT_FILE)
 
+cleanbear:
+	rm -f $(BEAR_OUTPUT_FILE)
 
-fullclean: bearclean clean
+$(BEAR_OUTPUT_FILE):
+	$(MAKE) clean
+	$(BEAR) -- $(MAKE) build
+
+fullclean: clean cleanbear
 
 debug:
-	@echo "BUILD_TYPE: $(BUILD_TYPE)"
-	@echo "TARGET: $(TARGET)"
-	@echo "SRCS:   $(SRCS)"
-	@echo "OBJS:   $(OBJS)"
-	@echo "CFLAGS: $(CFLAGS)"
-	@echo "LFLAGS: $(LFLAGS)"
+	@echo "path $(Z80EMU_PATH)"
+	@echo "files $(Z80EMU_FILES)"
+	@echo "srcs $(Z80EMU_SRCS)"
+	@echo "objs $(Z80EMU_OBJS)"
+	@echo "deps $(Z80EMU_DEPS)"
+	@echo "cflags $(Z80EMU_CFLAGS)"
 
-# target
-$(TARGET): $(OBJS)
+
+# advantage stuff
+$(ADV_TARGET): $(ADV_OBJS)
 	@mkdir -p $(dir $@)
-	$(LD) -o $@ $(OBJS) $(LFLAGS)
+	$(LD) -o $@ $(ADV_OBJS) $(LFLAGS) $(ADV_LFLAGS)
 
-emu.c.o: emu.c emu.h mobo.h mmu.h Makefile
-crt.c.o: crt.c crt.h mobo.h Makefile
-mmu.c.o: mmu.c mmu.h raw_memory.h Makefile
-mobo.c.o: mobo.c mobo.h adv_system_config.h crt.h mmu.h z80.h Makefile
-raw_memory.c.o: raw_memory.c raw_memory.h Makefile 
-test.c.o: test.c emu.h Makefile
-timer.c.o: timer.c timer.h Makefile
-z80.c.o: z80.c z80.h Makefile
-
-# generic
-$(BUILD_PATH)/$(SRC_PATH)/%.c.o: $(SRC_PATH)/%.c
+$(BUILD_OBJ_PATH)/%.c.o: $(ADV_PATH)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(ADV_CFLAGS)
+
+$(BUILD_DEP_PATH)/%.c.d: $(ADV_PATH)/%.c
+	@mkdir -p $(dir $@)
+	@rm -f $@
+	@$(CC) -MM $< $(CFLAGS) $(ADV_CFLAGS) > $@.tmp
+	@sed 's,$*\.o,$(BUILD_OBJ_PATH)/$*.c.o $@,g' < $@.tmp > $@
+	@rm -f $@.tmp
 
 
+# z80emu stuff
+$(Z80EMU_USER_NOUSE):
+	mv $(Z80EMU_USER_EX) $(Z80EMU_USER_NOUSE)
+
+$(BUILD_OBJ_PATH)/%.c.o: $(Z80EMU_PATH)/%.c $(Z80EMU_USER_NOUSE)
+	@mkdir -p $(dir $@)
+	$(CC) -c -o $@ $< $(CFLAGS) $(Z80EMU_CFLAGS)
+
+$(BUILD_DEP_PATH)/%.c.d: $(Z80EMU_PATH)/%.c $(Z80EMU_USER_NOUSE)
+	@mkdir -p $(dir $@)
+	@rm -f $@
+	@$(CC) -MM $< $(CFLAGS) $(Z80EMU_CFLAGS) > $@.tmp
+	@sed 's,$*\.o,$(BUILD_OBJ_PATH)/$*.c.o $@,g' < $@.tmp > $@
+	@rm -f $@.tmp
+
+
+include $(ADV_DEPS)
+include $(Z80EMU_DEPS)
 # vim: noet
 # end of file
