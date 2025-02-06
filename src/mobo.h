@@ -20,6 +20,10 @@ bool mobo_should_exit (mobo_t *self);
 
 void mobo_exit (mobo_t *self);
 
+void *mobo_get_cpu (mobo_t *self);
+void *mobo_get_crt (mobo_t *self);
+void *mobo_get_ram (mobo_t *self);
+
 int mobo_load_prom_file (mobo_t *self, char *filename);
 void mobo_load_prom (mobo_t *self, uint8_t *buffer, size_t buf_size);
 

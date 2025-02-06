@@ -2,6 +2,7 @@
 #include "mobo.h"
 
 #include "adv_system_config.h"
+#include "control_panel.h"
 #include "crt.h"
 #include "fileio.h"
 #include "mmu.h"
@@ -140,7 +141,6 @@ mobo_load_prom (mobo_t *self, uint8_t *buffer, size_t buf_size)
 void
 mobo_start (mobo_t *self)
 {
-    char input = 0;
     int retcode = 0;
     char *prom_file = NULL;
     thrd_t threads[4] = { 0 };
@@ -162,9 +162,8 @@ mobo_start (mobo_t *self)
 
     (void)thrd_create (&threads[0], (thrd_start_t)crt_start, self->crt);
     (void)thrd_create (&threads[1], (thrd_start_t)z80_start, self->cpu);
-    
-    input = getc (stdin);
-    mobo_exit (self);
+
+    control_panel_start (self);
 
     (void)thrd_join (threads[0], NULL);
     (void)thrd_join (threads[1], NULL);
@@ -184,6 +183,30 @@ mobo_exit (mobo_t *self)
 {
     assert (self);
     self->should_exit = true;
+}
+
+
+void *
+mobo_get_cpu (mobo_t *self)
+{
+    assert (self);
+    return self->cpu;
+}
+
+
+void *
+mobo_get_crt (mobo_t *self)
+{
+    assert (self);
+    return self->crt;
+}
+
+
+void *
+mobo_get_ram (mobo_t *self)
+{
+    assert (self);
+    return self->ram;
 }
 
 

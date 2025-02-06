@@ -20,6 +20,7 @@ Z80EMU_USER_NOUSE := $(Z80EMU_USER_EX).nouse
 # Advantage Emulator
 ADV_TARGET := $(BUILD_BIN_PATH)/a.out
 ADV_FILES  := \
+			  control_panel.c \
 			  crt.c \
 			  emu.c \
 			  fileio.c \
