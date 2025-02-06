@@ -11,8 +11,8 @@ ADV_PATH    := $(SRC_PATH)
 # Z80Emu
 Z80EMU_FILES  := z80emu.c
 Z80EMU_SRCS   := $(addprefix $(Z80EMU_PATH)/,$(Z80EMU_FILES))
-Z80EMU_OBJS   := $(foreach filename,$(Z80EMU_FILES),$(BUILD_OBJ_PATH)/$(filename).o)
-Z80EMU_DEPS   := $(foreach filename,$(Z80EMU_FILES),$(BUILD_DEP_PATH)/$(filename).d)
+Z80EMU_OBJS   := $(foreach filename,$(Z80EMU_FILES),$(BUILD_OBJ_PATH)/z80emu/$(filename).o)
+Z80EMU_DEPS   := $(foreach filename,$(Z80EMU_FILES),$(BUILD_DEP_PATH)/z80emu/$(filename).d)
 Z80EMU_CFLAGS := -I$(Z80EMU_PATH) -I$(ADV_PATH)
 Z80EMU_USER_EX    := $(Z80EMU_PATH)/z80user.h
 Z80EMU_USER_NOUSE := $(Z80EMU_USER_EX).nouse
@@ -30,9 +30,9 @@ ADV_FILES  := \
 			  test.c \
 			  timer.c \
 			  z80.c
-ADV_SRCS   := $(addprefix $(SRC_PATH)/,$(ADV_FILES))
-ADV_DEPS   := $(foreach filename,$(ADV_FILES),$(BUILD_DEP_PATH)/$(filename).d)
-ADV_OBJS   := $(foreach filename,$(ADV_FILES),$(BUILD_OBJ_PATH)/$(filename).o) \
+ADV_SRCS   := $(addprefix $(ADV_PATH)/,$(ADV_FILES))
+ADV_DEPS   := $(foreach filename,$(ADV_FILES),$(BUILD_DEP_PATH)/adv/$(filename).d)
+ADV_OBJS   := $(foreach filename,$(ADV_FILES),$(BUILD_OBJ_PATH)/adv/$(filename).o) \
 			  $(Z80EMU_OBJS)
 ADV_CFLAGS := -I$(ADV_PATH) -I$(Z80EMU_PATH)
 ADV_LFLAGS := $(THREADS_LFLAGS)
@@ -59,7 +59,7 @@ clean:
 	-find $(BUILD_PATH) -type d -delete
 
 runadv:
-	./$(ADV_TARGET)
+	$(ADV_TARGET)
 
 bear: $(BEAR_OUTPUT_FILE)
 
@@ -86,15 +86,15 @@ $(ADV_TARGET): $(ADV_OBJS)
 	@mkdir -p $(dir $@)
 	$(LD) -o $@ $(ADV_OBJS) $(LFLAGS) $(ADV_LFLAGS)
 
-$(BUILD_OBJ_PATH)/%.c.o: $(ADV_PATH)/%.c
+$(BUILD_OBJ_PATH)/adv/%.c.o: $(ADV_PATH)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) -c -o $@ $< $(CFLAGS) $(ADV_CFLAGS)
+	@$(CC) -c -o $@ $< $(CFLAGS) $(ADV_CFLAGS)
 
-$(BUILD_DEP_PATH)/%.c.d: $(ADV_PATH)/%.c
+$(BUILD_DEP_PATH)/adv/%.c.d: $(ADV_PATH)/%.c
 	@mkdir -p $(dir $@)
 	@rm -f $@
 	@$(CC) -MM $< $(CFLAGS) $(ADV_CFLAGS) > $@.tmp
-	@sed 's,$*\.o,$(BUILD_OBJ_PATH)/$*.c.o $@,g' < $@.tmp > $@
+	@sed 's,$*\.o,$(BUILD_OBJ_PATH)/adv/$*.c.o $@,g' < $@.tmp > $@
 	@rm -f $@.tmp
 
 
@@ -102,15 +102,15 @@ $(BUILD_DEP_PATH)/%.c.d: $(ADV_PATH)/%.c
 $(Z80EMU_USER_NOUSE):
 	mv $(Z80EMU_USER_EX) $(Z80EMU_USER_NOUSE)
 
-$(BUILD_OBJ_PATH)/%.c.o: $(Z80EMU_PATH)/%.c $(Z80EMU_USER_NOUSE)
+$(BUILD_OBJ_PATH)/z80emu/%.c.o: $(Z80EMU_PATH)/%.c $(Z80EMU_USER_NOUSE)
 	@mkdir -p $(dir $@)
 	$(CC) -c -o $@ $< $(CFLAGS) $(Z80EMU_CFLAGS)
 
-$(BUILD_DEP_PATH)/%.c.d: $(Z80EMU_PATH)/%.c $(Z80EMU_USER_NOUSE)
+$(BUILD_DEP_PATH)/z80emu/%.c.d: $(Z80EMU_PATH)/%.c $(Z80EMU_USER_NOUSE)
 	@mkdir -p $(dir $@)
 	@rm -f $@
 	@$(CC) -MM $< $(CFLAGS) $(Z80EMU_CFLAGS) > $@.tmp
-	@sed 's,$*\.o,$(BUILD_OBJ_PATH)/$*.c.o $@,g' < $@.tmp > $@
+	@sed 's,$*\.o,$(BUILD_OBJ_PATH)/z80emu/$*.c.o $@,g' < $@.tmp > $@
 	@rm -f $@.tmp
 
 
