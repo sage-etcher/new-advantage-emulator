@@ -31,6 +31,12 @@ ifeq ($(OS),FreeBSD)
     THREADS_LFLAGS = -lstdthreads
 endif
 
+# GTK4 library
+GTK4_PKGCONFIG := gtk4
+GTK4_CFLAGS := $(shell pkg-config --cflags $(GTK4_PKGCONFIG))
+GTK4_LFLAGS := $(shell pkg-config --libs $(GTK4_PKGCONFIG))
+
+
 # global flags
 WARN  = -Wall 
 WARN += -Wextra 
