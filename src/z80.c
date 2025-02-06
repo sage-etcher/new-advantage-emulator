@@ -3,6 +3,7 @@
 
 #include "mobo.h"
 #include "timer.h"
+#include "z80emu.h" /* z80emu external */
 
 #include <assert.h>
 #include <stddef.h>
@@ -16,9 +17,8 @@
 typedef struct z80
 {
     mobo_t *parent;
-    uint32_t ticks;
-
-    int nothing_here;
+    _Atomic bool halt;
+    Z80_STATE state;
 } z80_t;
 
 
@@ -51,30 +51,52 @@ z80_destroy (z80_t *self)
 void *
 z80_start (z80_t *self)
 {
+
+    /* check if we are still HALTed every 10ms */
+    const struct timespec HALT_CHECK = { .tv_sec = 0, .tv_nsec = 10000000 };
+
     /* expecting cpu of 4mhz, scale ticks acordingly */
     /* wait for 100us or 10khz every 400 emulated cycles */
     /* current systems cannot wait precise nanoseonds */
-    const struct timespec CPU_SPEED = { .tv_nsec = 100000 };
-    const uint32_t ticks_before_sleep = 400;
+    const struct timespec CPU_SPEED = { .tv_sec = 0, .tv_nsec = 100000 };
+    const int BUSY_CYCLES = 400;
+
     struct timespec previous_frame = { 0 };
-    struct timespec previous_sleep = { 0 };
 
-    self->ticks = 0;
+    assert (self);
 
+    (void)Z80Reset (&self->state);
     while (!mobo_should_exit (self->parent))
     {
-
-
-        self->ticks++; /* debug ONLY */
-
-        while (self->ticks>= ticks_before_sleep)
+        if (self->halt)
         {
-            self->ticks -= ticks_before_sleep;
-            previous_sleep = timer (&previous_frame, CPU_SPEED);
+            (void)timer (&previous_frame, HALT_CHECK);
+            continue;
         }
+
+        (void)Z80Emulate (&self->state, BUSY_CYCLES, self->parent);
+        if (self->state.status == Z80_STATUS_HALT) { z80_halt (self); }
+
+        (void)timer (&previous_frame, CPU_SPEED);
     }
 
     thrd_exit (thrd_success);
+}
+
+
+void
+z80_halt (z80_t *self)
+{
+    assert (self);
+    self->halt = true;
+}
+
+
+void
+z80_unhalt (z80_t *self)
+{
+    assert (self);
+    self->halt = false;
 }
 
 

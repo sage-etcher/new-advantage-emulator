@@ -173,4 +173,38 @@ mobo_read_dram (mobo_t *self, size_t addr)
     return mmu_read_raw (self->ram, page_index, addr);
 }
 
+
+uint8_t
+mobo_ram_read (mobo_t *self, size_t addr)
+{
+    uint8_t data = 0;
+    assert (self);
+    data = mmu_read (self->ram, addr);
+    return data;
+}
+
+
+void
+mobo_ram_write (mobo_t *self, size_t addr, uint8_t data)
+{
+    assert (self);
+    mmu_write (self->ram, addr, data);
+}
+
+
+uint8_t
+mobo_output_byte (mobo_t *self, uint8_t port)
+{
+    printf ("output on port %u, not permitted\n", port);
+    return 0;
+}
+
+
+void
+mobo_input_byte (mobo_t *self, uint8_t port, uint8_t data)
+{
+    printf ("input on port %u of data %u, not permitted\n", port, data);
+}
+
+
 /* end of file */

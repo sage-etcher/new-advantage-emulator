@@ -14,5 +14,9 @@ void z80_destroy (z80_t *self);
 
 void *z80_start (z80_t *self);
 
+void z80_halt (z80_t *self);
+
+void z80_unhalt (z80_t *self);
+
 #endif
 /* end of file */
